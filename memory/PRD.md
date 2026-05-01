@@ -28,17 +28,21 @@
 ### Backend (`/app/backend/`)
 - `auth.py` — login/logout/me, role-guard `require_roles()`, user CRUD
 - `pos_routes.py` — categories, menu-items, tables, orders (+payment, status), aggregator (simulate + webhook), reports/sales, settings, /sync
+- `ai_assistant.py` — Claude Sonnet 4.5 via emergentintegrations; `POST /api/ai/chat` (multi-turn, live data context), `POST /api/ai/summary` (EoD), `GET /api/ai/sessions`, `GET /api/ai/sessions/{id}/messages`, `DELETE /api/ai/sessions/{id}`. Persists messages in `ai_messages`.
 - `seed.py` — admin/cashier/waiter, 6 categories, 19 menu items, 12 tables, default restaurant settings, writes `/app/memory/test_credentials.md`
 - Idempotent offline sync via `client_id`; webhook idempotent via `aggregator_order_id`
 
 ### Frontend (`/app/frontend/src/`)
-- Pages: Login, Dashboard, POS, Tables, KOT, Aggregators, Menu, Reports, Staff, Settings
-- AuthContext with token persistence; Layout with sidebar, online/offline indicator + sync button
+- Pages: Login, Dashboard, POS, Tables, KOT, Aggregators, **AI Assistant**, Menu, Reports, Staff, Settings
+- AuthContext with token persistence; Layout with sidebar, online/offline indicator + sync button + floating "Ask Spice" bubble
+- `components/AIChatPanel.jsx` reusable chat UI with 4 starter suggestions + EoD summary button
+- `components/AIBubble.jsx` floating chat accessible from every authenticated page
 - Offline queue (`lib/offline.js`) + auto-sync on reconnect
 
 ## Testing
-- 26/26 backend pytest passing (`/app/backend/tests/backend_test.py`)
-- Frontend smoke test passed across all pages
+- 26/26 backend POS pytest passing (`/app/backend/tests/backend_test.py`)
+- 11/11 backend AI pytest passing (`/app/backend/tests/test_ai_assistant.py`)
+- Frontend smoke + AI flows verified end-to-end
 
 ## Test credentials
 See `/app/memory/test_credentials.md`
