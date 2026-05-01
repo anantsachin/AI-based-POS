@@ -1,0 +1,122 @@
+{
+  "theme": "LIGHT",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "design_philosophy": "Operator-focused dashboard aesthetic designed for fast-paced restaurant environments. Prioritizes extreme clarity, fast scanning, large tap targets, and functional status color-coding. Unnecessary decoration is stripped away in favor of high-contrast, structural precision.",
+  "colors": {
+    "background_primary": "#F8F9FA",
+    "background_secondary": "#FFFFFF",
+    "surface": "#FFFFFF",
+    "primary": "#0F172A",
+    "primary_hover": "#1E293B",
+    "text_primary": "#111827",
+    "text_secondary": "#4B5563",
+    "text_tertiary": "#6B7280",
+    "border": "#E2E8F0",
+    "border_hover": "#CBD5E1",
+    "status": {
+      "success": "#16A34A",
+      "warning": "#F59E0B",
+      "danger": "#DC2626",
+      "info": "#2563EB",
+      "zomato": "#E23744",
+      "swiggy": "#FC8019",
+      "offline": "#64748B",
+      "table_available": "#F1F5F9",
+      "table_occupied": "#FEF3C7",
+      "table_billing": "#DBEAFE"
+    }
+  },
+  "typography": {
+    "heading_font": "Work Sans",
+    "body_font": "IBM Plex Sans",
+    "scales": {
+      "h1": "text-4xl tracking-tight leading-none",
+      "h2": "text-2xl tracking-tight leading-snug",
+      "h3": "text-xl font-medium",
+      "h4": "text-lg font-medium",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm",
+      "tiny": "text-xs uppercase tracking-wider font-semibold"
+    }
+  },
+  "spacing_and_layout": {
+    "container_padding": "p-4 md:p-6",
+    "card_padding": "p-4",
+    "gap": "gap-4 md:gap-6",
+    "radius": "rounded-lg",
+    "grid_strategy": {
+      "pos_screen": "grid-cols-12 gap-4 with 8 cols for menu, 4 cols for cart",
+      "table_management": "grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4",
+      "kitchen_display": "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    }
+  },
+  "surfaces_and_borders": {
+    "card": "bg-white border border-slate-200 shadow-sm",
+    "active_card": "bg-white border-2 border-slate-900 shadow-md",
+    "aggregator_card_zomato": "bg-white border-l-4 border-l-[#E23744] shadow-sm",
+    "aggregator_card_swiggy": "bg-white border-l-4 border-l-[#FC8019] shadow-sm",
+    "glass_header": "bg-white/90 backdrop-blur-xl border-b border-slate-200"
+  },
+  "motion_and_interactions": {
+    "hover_state": "transition-colors duration-200",
+    "tap_state": "active:scale-[0.98] transition-transform",
+    "focus_state": "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-slate-900 text-white hover:bg-slate-800 rounded-md px-6 py-3 font-medium h-auto",
+      "secondary": "bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 rounded-md px-6 py-3 font-medium h-auto",
+      "danger": "bg-red-600 text-white hover:bg-red-700 rounded-md px-6 py-3 font-medium h-auto",
+      "tap_target": "min-h-[48px] min-w-[48px]"
+    },
+    "inputs": {
+      "default": "border-slate-300 rounded-md focus:border-slate-900 focus:ring-slate-900 h-12"
+    },
+    "badges": {
+      "default": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+    }
+  },
+  "media": {
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1551530078-379240770349?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzV8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwaW50ZXJpb3IlMjBjYWZlfGVufDB8fHx8MTc3NzYyOTg0MHww&ixlib=rb-4.1.0&q=85",
+        "category": "background",
+        "description": "Restaurant interior for login screen background"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1496811425508-6d7ebb7ff32c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwyfHx3YWl0ZXIlMjBzdGFmZiUyMHBvcnRyYWl0fGVufDB8fHx8MTc3NzYyOTg0MHww&ixlib=rb-4.1.0&q=85",
+        "category": "avatar",
+        "description": "Profile picture for cashier/waiter"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1703575572016-b82f05e6d4f9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwxfHxkZWxpY2lvdXMlMjBmYXN0JTIwZm9vZCUyMGJ1cmdlciUyMHBpenphfGVufDB8fHx8MTc3NzYyOTg0MHww&ixlib=rb-4.1.0&q=85",
+        "category": "product",
+        "description": "Menu item image (Pizza)"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1643995529761-20311e27cd88?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHw0fHxkZWxpY2lvdXMlMjBmYXN0JTIwZm9vZCUyMGJ1cmdlciUyMHBpenphfGVufDB8fHx8MTc3NzYyOTg0MHww&ixlib=rb-4.1.0&q=85",
+        "category": "product",
+        "description": "Menu item image (Burger/Fries)"
+      }
+    ]
+  },
+  "iconography": {
+    "library": "lucide-react",
+    "size": "w-5 h-5 for inline, w-8 h-8 for empty states",
+    "stroke_width": "2"
+  },
+  "testing": {
+    "data_testid_convention": "kebab-case, role-based, required on all interactive elements"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette, using aggregator brand colors (Zomato Red, Swiggy Orange) exclusively for their respective integrations.",
+    "Ensure all tap targets (buttons, menu items, table squares) have a minimum height of 48px to accommodate fast, imprecise tapping.",
+    "Use grid-cols-12 for the main POS layout: 8 columns for the menu grid and 4 columns for the active cart.",
+    "Implement clear visual distinctions for table states using the status colors defined in the palette.",
+    "Never use generic placeholder images. Use the provided Unsplash URLs.",
+    "Apply `data-testid` to all actionable components.",
+    "Use Lucide React icons for all iconography.",
+    "Use standard Shadcn components for forms, tables, and dialogs, but style them with strict high-contrast borders and removing soft box-shadows.",
+    "Display a visible 'Offline Mode' badge in the header using the designated offline status color when applicable."
+  ]
+}
