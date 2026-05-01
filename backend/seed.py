@@ -138,8 +138,10 @@ async def seed_all(db):
 
 
 async def write_test_credentials():
-    """Update /app/memory/test_credentials.md after seeding."""
-    os.makedirs("/app/memory", exist_ok=True)
+    """Update memory/test_credentials.md after seeding."""
+    import pathlib
+    memory_dir = pathlib.Path(__file__).parent.parent / "memory"
+    memory_dir.mkdir(exist_ok=True)
     content = """# Restaurant POS - Test Credentials
 
 ## Admin
@@ -162,5 +164,5 @@ async def write_test_credentials():
 - POST /api/auth/logout
 - GET  /api/auth/me  (requires Authorization: Bearer <token>)
 """
-    with open("/app/memory/test_credentials.md", "w") as f:
+    with open(memory_dir / "test_credentials.md", "w") as f:
         f.write(content)

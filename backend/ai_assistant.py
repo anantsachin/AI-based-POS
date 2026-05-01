@@ -1,4 +1,4 @@
-"""AI Assistant for the Restaurant POS — Claude Sonnet 4.5 via emergentintegrations.
+"""AI Assistant for the Restaurant POS — Gemini via official Google GenAI SDK.
 
 The assistant can answer natural-language questions about live POS data:
 sales, orders, tables, menu, top items, slow movers, end-of-day summary.
@@ -6,23 +6,22 @@ sales, orders, tables, menu, top items, slow movers, end-of-day summary.
 Approach:
 - /api/ai/chat: gather a JSON snapshot of the live POS state, embed it into the
   system prompt along with the last few conversation turns from MongoDB, then
-  send the new user message via emergentintegrations.LlmChat (Anthropic Claude
-  Sonnet 4.5). All messages are persisted in `ai_messages`.
+  send the new user message via google-generativeai AsyncClient.
+  All messages are persisted in `ai_messages`.
 """
 import os
 import uuid
+import json
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, Request, Depends, HTTPException
 from pydantic import BaseModel
-
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+import google.generativeai as genai
 
 from auth import get_current_user
 
 
-MODEL_PROVIDER = "anthropic"
-MODEL_NAME = "claude-sonnet-4-5-20250929"
+MODEL_NAME = "gemini-1.5-flash"
 
 
 def _now_iso() -> str:
@@ -149,7 +148,6 @@ async def _build_context(db) -> dict:
 
 
 def _system_prompt(context: dict, currency: str) -> str:
-    import json
     return f"""You are "Spice", the AI assistant embedded in a restaurant Point-of-Sale system.
 
 You answer the manager's questions about LIVE restaurant data. Be concise, friendly, and direct. Use the currency symbol {currency} for money.
@@ -166,6 +164,28 @@ GUIDELINES
 CONTEXT (JSON):
 {json.dumps(context, default=str)}
 """
+
+
+# ---------- Gemini async helper ----------
+async def _call_gemini(api_key: str, system: str, messages: list) -> str:
+    """Call Gemini via the official google-generativeai SDK."""
+    import asyncio
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(
+        model_name=MODEL_NAME,
+        system_instruction=system,
+    )
+    # Build history for multi-turn (all but last message)
+    history = []
+    for msg in messages[:-1]:
+        role = "user" if msg["role"] == "user" else "model"
+        history.append({"role": role, "parts": [msg["content"]]})
+
+    chat = model.start_chat(history=history)
+    # Send last message
+    last_content = messages[-1]["content"] if messages else ""
+    response = await asyncio.to_thread(chat.send_message, last_content)
+    return response.text
 
 
 # ---------- Schemas ----------
@@ -189,9 +209,9 @@ ai_router = APIRouter(prefix="/api/ai", tags=["ai"])
 @ai_router.post("/chat")
 async def chat(payload: ChatIn, request: Request, user: dict = Depends(get_current_user)):
     db = request.app.state.db
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise HTTPException(500, "EMERGENT_LLM_KEY not configured")
+        raise HTTPException(500, "GEMINI_API_KEY not configured")
 
     text = (payload.message or "").strip()
     if not text:
@@ -221,26 +241,16 @@ async def chat(payload: ChatIn, request: Request, user: dict = Depends(get_curre
     ).sort("created_at", -1).to_list(8)
     history.reverse()
 
-    # Prepend short transcript into the user message so the LlmChat call has context.
-    # (LlmChat instances are single-turn from our DB's perspective; we inject history.)
-    if history:
-        transcript = "\n".join(
-            f"{'Manager' if h['role'] == 'user' else 'Spice'}: {h['text']}"
-            for h in history
-        )
-        composed = f"Recent conversation:\n{transcript}\n\nManager: {text}"
-    else:
-        composed = text
-
-    chat_inst = LlmChat(
-        api_key=api_key,
-        session_id=session_id,
-        system_message=sys_prompt,
-    ).with_model(MODEL_PROVIDER, MODEL_NAME)
+    # Build messages list for Gemini
+    gemini_messages = []
+    for h in history:
+        role = "user" if h["role"] == "user" else "assistant"
+        gemini_messages.append({"role": role, "content": h["text"]})
+    gemini_messages.append({"role": "user", "content": text})
 
     response_text: str = ""
     try:
-        response_text = str(await chat_inst.send_message(UserMessage(text=composed)))
+        response_text = await _call_gemini(api_key, sys_prompt, gemini_messages)
     except Exception as e:
         raise HTTPException(502, f"AI provider error: {e}") from e
 
@@ -265,17 +275,13 @@ async def chat(payload: ChatIn, request: Request, user: dict = Depends(get_curre
 async def daily_summary(request: Request, user: dict = Depends(get_current_user)):
     """One-shot end-of-day summary using current context."""
     db = request.app.state.db
-    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise HTTPException(500, "EMERGENT_LLM_KEY not configured")
+        raise HTTPException(500, "GEMINI_API_KEY not configured")
 
     context = await _build_context(db)
     sys_prompt = _system_prompt(context, context["restaurant"]["currency_symbol"])
     session_id = f"summary-{user['id']}-{uuid.uuid4().hex[:6]}"
-
-    chat_inst = LlmChat(
-        api_key=api_key, session_id=session_id, system_message=sys_prompt,
-    ).with_model(MODEL_PROVIDER, MODEL_NAME)
 
     prompt = (
         "Generate today's End-of-Day summary for the manager. Use this format:\n\n"
@@ -288,11 +294,11 @@ async def daily_summary(request: Request, user: dict = Depends(get_current_user)
     )
 
     try:
-        reply = await chat_inst.send_message(UserMessage(text=prompt))
+        reply = await _call_gemini(api_key, sys_prompt, [{"role": "user", "content": prompt}])
     except Exception as e:
         raise HTTPException(502, f"AI provider error: {e}")
 
-    return {"session_id": session_id, "summary": str(reply)}
+    return {"session_id": session_id, "summary": reply}
 
 
 @ai_router.get("/sessions/{session_id}/messages", response_model=List[MessageOut])

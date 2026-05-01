@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: spiceroute-pos-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        value: restaurant_pos
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        value: "https://spiceroute-pos.vercel.app,http://localhost:3000"
+      - key: ADMIN_EMAIL
+        value: admin@pos.com
+      - key: ADMIN_PASSWORD
+        value: admin123
+      - key: PYTHON_VERSION
+        value: "3.11.0"
