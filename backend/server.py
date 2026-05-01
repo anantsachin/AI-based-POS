@@ -15,6 +15,7 @@ from pos_routes import (
     categories_router, menu_router, tables_router, orders_router,
     agg_router, reports_router, settings_router, sync_router,
 )
+from ai_assistant import ai_router
 from seed import seed_all, write_test_credentials
 
 
@@ -59,6 +60,7 @@ app.include_router(agg_router)
 app.include_router(reports_router)
 app.include_router(settings_router)
 app.include_router(sync_router)
+app.include_router(ai_router)
 
 
 @app.on_event("startup")

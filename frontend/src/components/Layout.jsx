@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Receipt, LayoutGrid, ChefHat, Bike,
   UtensilsCrossed, BarChart3, Users, Settings as Cog,
-  LogOut, Wifi, WifiOff, RefreshCw,
+  LogOut, Wifi, WifiOff, RefreshCw, Sparkles,
 } from "lucide-react";
 import { isOnline, getQueue, syncQueue } from "@/lib/offline";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import AIBubble from "@/components/AIBubble";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true, roles: ["admin", "cashier", "waiter"] },
@@ -16,6 +17,7 @@ const NAV = [
   { to: "/tables", label: "Tables", icon: LayoutGrid, roles: ["admin", "cashier", "waiter"] },
   { to: "/kot", label: "Kitchen (KOT)", icon: ChefHat, roles: ["admin", "cashier", "waiter"] },
   { to: "/aggregators", label: "Aggregators", icon: Bike, roles: ["admin", "cashier", "waiter"] },
+  { to: "/ai", label: "AI Assistant", icon: Sparkles, roles: ["admin", "cashier", "waiter"] },
   { to: "/menu", label: "Menu", icon: UtensilsCrossed, roles: ["admin"] },
   { to: "/reports", label: "Reports", icon: BarChart3, roles: ["admin", "cashier"] },
   { to: "/staff", label: "Staff", icon: Users, roles: ["admin"] },
@@ -166,6 +168,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <AIBubble />
     </div>
   );
 }

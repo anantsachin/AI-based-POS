@@ -12,6 +12,7 @@ import Menu from "@/pages/Menu";
 import Reports from "@/pages/Reports";
 import Staff from "@/pages/Staff";
 import Settings from "@/pages/Settings";
+import AIPage from "@/pages/AI";
 import { Toaster } from "@/components/ui/sonner";
 
 function Protected({ children, roles }) {
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/tables" element={<Tables />} />
             <Route path="/kot" element={<KOT />} />
             <Route path="/aggregators" element={<Aggregators />} />
+            <Route path="/ai" element={<AIPage />} />
             <Route path="/menu" element={<Protected roles={["admin"]}><Menu /></Protected>} />
             <Route path="/reports" element={<Protected roles={["admin", "cashier"]}><Reports /></Protected>} />
             <Route path="/staff" element={<Protected roles={["admin"]}><Staff /></Protected>} />
