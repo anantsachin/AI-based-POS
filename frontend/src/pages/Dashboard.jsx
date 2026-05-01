@@ -51,7 +51,7 @@ export default function Dashboard() {
       setData(r1.data);
       setOrders(r2.data);
     })();
-  }, []);
+  }, []); // mount-only: dashboard data fetched once on mount
 
   if (!data) return <div className="p-6 text-slate-500">Loading…</div>;
 

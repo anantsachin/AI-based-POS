@@ -29,15 +29,15 @@ export default function AIChatPanel({ embedded = false, onClose }) {
     const msg = (text ?? input).trim();
     if (!msg || loading) return;
     setInput("");
-    setMessages((p) => [...p, { role: "user", text: msg }]);
+    setMessages((p) => [...p, { id: `u-${Date.now()}`, role: "user", text: msg }]);
     setLoading(true);
     try {
       const { data } = await api.post("/ai/chat", { message: msg, session_id: sessionId });
       if (!sessionId) setSessionId(data.session_id);
-      setMessages((p) => [...p, { role: "assistant", text: data.reply }]);
+      setMessages((p) => [...p, { id: data.message_id || `a-${Date.now()}`, role: "assistant", text: data.reply }]);
     } catch (e) {
       toast.error(e?.response?.data?.detail || "AI is unavailable");
-      setMessages((p) => [...p, { role: "assistant", text: "Sorry, I couldn't reach the AI service. Please try again." }]);
+      setMessages((p) => [...p, { id: `e-${Date.now()}`, role: "assistant", text: "Sorry, I couldn't reach the AI service. Please try again." }]);
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,11 @@ export default function AIChatPanel({ embedded = false, onClose }) {
     setSummarizing(true);
     try {
       const { data } = await api.post("/ai/summary");
-      setMessages((p) => [...p, { role: "user", text: "Generate end-of-day summary" }, { role: "assistant", text: data.summary }]);
+      setMessages((p) => [
+        ...p,
+        { id: `u-${Date.now()}`, role: "user", text: "Generate end-of-day summary" },
+        { id: `a-${Date.now()}`, role: "assistant", text: data.summary },
+      ]);
     } catch (e) {
       toast.error("Could not generate summary");
     } finally { setSummarizing(false); }
@@ -98,12 +102,12 @@ export default function AIChatPanel({ embedded = false, onClose }) {
               </div>
             </div>
             <div className="grid gap-2 pt-1">
-              {SUGGESTIONS.map((s, i) => (
+              {SUGGESTIONS.map((s) => (
                 <button
-                  key={i}
+                  key={s}
                   onClick={() => send(s)}
                   className="text-left text-sm px-3 py-2 border border-slate-200 hover:border-slate-900 hover:bg-slate-50 rounded-md transition-colors"
-                  data-testid={`ai-suggestion-${i}`}
+                  data-testid={`ai-suggestion-${SUGGESTIONS.indexOf(s)}`}
                 >
                   {s}
                 </button>
@@ -113,7 +117,7 @@ export default function AIChatPanel({ embedded = false, onClose }) {
         )}
 
         {messages.map((m, i) => (
-          <div key={i} className={`flex items-start gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`} data-testid={`ai-msg-${m.role}-${i}`}>
+          <div key={m.id} className={`flex items-start gap-2.5 ${m.role === "user" ? "flex-row-reverse" : ""}`} data-testid={`ai-msg-${m.role}-${i}`}>
             <div className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-semibold ${
               m.role === "user" ? "bg-slate-200 text-slate-700" : "bg-slate-900 text-white"
             }`}>

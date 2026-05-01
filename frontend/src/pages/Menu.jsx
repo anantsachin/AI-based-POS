@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,13 +17,13 @@ export default function Menu() {
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const [c, m] = await Promise.all([api.get("/categories"), api.get("/menu-items")]);
     setCategories(c.data);
     setItems(m.data);
-  };
+  }, []);
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const save = async () => {
     const body = {

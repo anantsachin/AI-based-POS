@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Bike, Clock, Utensils } from "lucide-react";
@@ -10,29 +10,38 @@ const STAGES = [
   { id: "ready", label: "Ready", next: "served" },
 ];
 
-const channelDot = (ch) =>
-  ch === "swiggy" ? "border-l-swiggy" :
-  ch === "zomato" ? "border-l-zomato" :
-  ch === "takeaway" ? "border-l-emerald-500" :
-  "border-l-slate-900";
-
+const CHANNEL_DOT = {
+  swiggy: "border-l-swiggy",
+  zomato: "border-l-zomato",
+  takeaway: "border-l-emerald-500",
+  "dine-in": "border-l-slate-900",
+};
+const channelDot = (ch) => CHANNEL_DOT[ch] || "border-l-slate-900";
 const channelLabel = (ch) => ch.charAt(0).toUpperCase() + ch.slice(1);
+
+const CHANNEL_BADGE = {
+  swiggy: "bg-orange-100 text-[#fc8019]",
+  zomato: "bg-red-100 text-[#e23744]",
+  takeaway: "bg-emerald-100 text-emerald-700",
+  "dine-in": "bg-slate-100 text-slate-700",
+};
+const STATUS_TONE = { new: "text-blue-600", preparing: "text-amber-600", ready: "text-emerald-600" };
 
 export default function KOT() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { data } = await api.get("/orders", { params: { limit: 200 } });
     setOrders(data.filter((o) => ["new", "preparing", "ready"].includes(o.status)));
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
     const id = setInterval(refresh, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, [refresh]);
 
   const advance = async (o) => {
     const stage = STAGES.find((s) => s.id === o.status);
@@ -80,15 +89,8 @@ export default function KOT() {
                   {new Date(o.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
-              <span
-                className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded ${
-                  o.channel === "swiggy" ? "bg-orange-100 text-[#fc8019]"
-                  : o.channel === "zomato" ? "bg-red-100 text-[#e23744]"
-                  : o.channel === "takeaway" ? "bg-emerald-100 text-emerald-700"
-                  : "bg-slate-100 text-slate-700"
-                }`}
-              >
-                {o.channel === "swiggy" || o.channel === "zomato" ? <Bike className="w-3 h-3 inline mr-1" /> : <Utensils className="w-3 h-3 inline mr-1" />}
+              <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded ${CHANNEL_BADGE[o.channel] || CHANNEL_BADGE["dine-in"]}`}>
+                {(o.channel === "swiggy" || o.channel === "zomato") ? <Bike className="w-3 h-3 inline mr-1" /> : <Utensils className="w-3 h-3 inline mr-1" />}
                 {channelLabel(o.channel)}
               </span>
             </div>
@@ -104,7 +106,7 @@ export default function KOT() {
 
             <ul className="space-y-1.5 text-sm">
               {o.items.map((it, idx) => (
-                <li key={idx} className="flex items-baseline justify-between gap-2 py-1 border-b border-slate-50 last:border-0">
+                <li key={`${it.menu_item_id || it.name}-${idx}`} className="flex items-baseline justify-between gap-2 py-1 border-b border-slate-50 last:border-0">
                   <div className="flex-1 min-w-0">
                     <span className="font-mono text-slate-500 mr-2">×{it.quantity}</span>
                     <span className="font-medium text-slate-900">{it.name}</span>
@@ -115,11 +117,7 @@ export default function KOT() {
             </ul>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className={`text-xs font-bold uppercase tracking-wider ${
-                o.status === "new" ? "text-blue-600" :
-                o.status === "preparing" ? "text-amber-600" :
-                "text-emerald-600"
-              }`}>{o.status}</span>
+              <span className={`text-xs font-bold uppercase tracking-wider ${STATUS_TONE[o.status] || "text-slate-600"}`}>{o.status}</span>
               <Button onClick={() => advance(o)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white" data-testid={`kot-advance-${o.id}`}>
                 Mark {STAGES.find((s) => s.id === o.status)?.next === "served" && (o.channel === "swiggy" || o.channel === "zomato") ? "dispatched" : STAGES.find((s) => s.id === o.status)?.next}
               </Button>

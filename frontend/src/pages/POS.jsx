@@ -36,7 +36,7 @@ export default function POS() {
       setItems(m.data);
       setTables(t.data);
     })();
-  }, []);
+  }, []); // mount-only: load menu/tables once
 
   const filtered = useMemo(() => {
     return items.filter((it) => {

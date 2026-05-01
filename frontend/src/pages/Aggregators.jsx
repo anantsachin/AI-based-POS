@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Bike, RefreshCw, Plus } from "lucide-react";
@@ -14,16 +14,16 @@ export default function Aggregators() {
   const [filter, setFilter] = useState("all");
   const [busy, setBusy] = useState("");
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { data } = await api.get("/orders", { params: { limit: 200 } });
     setOrders(data.filter((o) => o.channel === "swiggy" || o.channel === "zomato"));
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
     const id = setInterval(refresh, 6000);
     return () => clearInterval(id);
-  }, []);
+  }, [refresh]);
 
   const simulate = async (source) => {
     setBusy(source);
@@ -125,7 +125,7 @@ export default function Aggregators() {
 
               <ul className="space-y-1 text-sm border-t border-slate-100 pt-3">
                 {o.items.map((it, idx) => (
-                  <li key={idx} className="flex justify-between">
+                  <li key={`${it.menu_item_id || it.name}-${idx}`} className="flex justify-between">
                     <span><span className="font-mono text-slate-500 mr-1">×{it.quantity}</span>{it.name}</span>
                     <span className="font-mono text-slate-600">₹ {(it.price * it.quantity).toFixed(0)}</span>
                   </li>

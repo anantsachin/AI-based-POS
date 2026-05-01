@@ -6,17 +6,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Utensils, ChefHat, ShieldCheck, Loader2 } from "lucide-react";
 
-const QUICK = [
-  { role: "Admin", email: "admin@pos.com", password: "admin123", icon: ShieldCheck },
-  { role: "Cashier", email: "cashier@pos.com", password: "cashier123", icon: Utensils },
-  { role: "Waiter", email: "waiter@pos.com", password: "waiter123", icon: ChefHat },
-];
+const DEMO_CREDS_RAW = process.env.REACT_APP_DEMO_CREDS || "";
+const SHOW_DEMO = process.env.REACT_APP_SHOW_DEMO_LOGIN !== "false" && DEMO_CREDS_RAW.length > 0;
+
+/**
+ * REACT_APP_DEMO_CREDS format: "Admin:admin@pos.com:admin123|Cashier:cashier@pos.com:cashier123|..."
+ * Hidden in production by setting REACT_APP_SHOW_DEMO_LOGIN=false.
+ */
+const ICONS = { Admin: ShieldCheck, Cashier: Utensils, Waiter: ChefHat };
+const QUICK = DEMO_CREDS_RAW
+  .split("|")
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .map((entry) => {
+    const [role, email, password] = entry.split(":");
+    return { role, email, password, icon: ICONS[role] || ShieldCheck };
+  });
 
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@pos.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

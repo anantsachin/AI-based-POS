@@ -238,24 +238,25 @@ async def chat(payload: ChatIn, request: Request, user: dict = Depends(get_curre
         system_message=sys_prompt,
     ).with_model(MODEL_PROVIDER, MODEL_NAME)
 
+    response_text: str = ""
     try:
-        response_text = await chat_inst.send_message(UserMessage(text=composed))
+        response_text = str(await chat_inst.send_message(UserMessage(text=composed)))
     except Exception as e:
-        raise HTTPException(502, f"AI provider error: {e}")
+        raise HTTPException(502, f"AI provider error: {e}") from e
 
     assistant_msg = {
         "id": str(uuid.uuid4()),
         "session_id": session_id,
         "user_id": user["id"],
         "role": "assistant",
-        "text": str(response_text),
+        "text": response_text,
         "created_at": _now_iso(),
     }
     await db.ai_messages.insert_one(assistant_msg)
 
     return {
         "session_id": session_id,
-        "reply": str(response_text),
+        "reply": response_text,
         "message_id": assistant_msg["id"],
     }
 

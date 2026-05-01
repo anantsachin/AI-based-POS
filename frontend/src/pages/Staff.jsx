@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +15,12 @@ export default function Staff() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", name: "", password: "", role: "waiter" });
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const { data } = await api.get("/users");
     setUsers(data);
-  };
+  }, []);
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const save = async () => {
     try {

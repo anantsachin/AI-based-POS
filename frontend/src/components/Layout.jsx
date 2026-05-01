@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   LayoutDashboard, Receipt, LayoutGrid, ChefHat, Bike,
   UtensilsCrossed, BarChart3, Users, Settings as Cog,
@@ -31,6 +31,23 @@ export default function Layout() {
   const [queueCount, setQueueCount] = useState(getQueue().length);
   const [syncing, setSyncing] = useState(false);
 
+  const handleSync = useCallback(async (silent = false) => {
+    if (getQueue().length === 0) {
+      if (!silent) toast("No pending offline orders");
+      return;
+    }
+    setSyncing(true);
+    try {
+      const res = await syncQueue(api);
+      setQueueCount(0);
+      toast.success(`Synced ${res.created.length} order(s)`);
+    } catch {
+      toast.error("Sync failed. Will retry when online.");
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
   useEffect(() => {
     const refresh = () => setQueueCount(getQueue().length);
     const goOnline = async () => {
@@ -49,24 +66,7 @@ export default function Layout() {
       window.removeEventListener("storage", refresh);
       clearInterval(id);
     };
-  }, []);
-
-  const handleSync = async (silent = false) => {
-    if (getQueue().length === 0) {
-      if (!silent) toast("No pending offline orders");
-      return;
-    }
-    setSyncing(true);
-    try {
-      const res = await syncQueue(api);
-      setQueueCount(0);
-      toast.success(`Synced ${res.created.length} order(s)`);
-    } catch {
-      toast.error("Sync failed. Will retry when online.");
-    } finally {
-      setSyncing(false);
-    }
-  };
+  }, [handleSync]);
 
   const handleLogout = () => {
     logout();

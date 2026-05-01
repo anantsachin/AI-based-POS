@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, []); // mount-only: validate session once on app boot
 
   const login = async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });

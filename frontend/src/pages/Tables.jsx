@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users } from "lucide-react";
@@ -15,7 +15,7 @@ export default function Tables() {
   const [orders, setOrders] = useState({});
   const navigate = useNavigate();
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const [t, o] = await Promise.all([
       api.get("/tables"),
       api.get("/orders", { params: { channel: "dine-in", limit: 200 } }),
@@ -24,13 +24,13 @@ export default function Tables() {
     const byId = {};
     o.data.forEach((or) => { if (or.table_id) byId[or.table_id] = or; });
     setOrders(byId);
-  };
+  }, []);
 
   useEffect(() => {
     refresh();
     const id = setInterval(refresh, 8000);
     return () => clearInterval(id);
-  }, []);
+  }, [refresh]);
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px]" data-testid="tables-page">
